@@ -1,1 +1,1 @@
-# v4.0: FX Hourly + SL/TP + Heatmap
+AI Trader v4.1 — Auto‑Tune (minimal bundle)
