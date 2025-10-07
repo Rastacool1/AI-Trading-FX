@@ -41,12 +41,10 @@ def load_price_csv(csv_path_or_buffer, timeframe: str = "D", tz: str|None=None) 
         'Najnizszy': pd.to_numeric(df[lc], errors='coerce') if lc else pd.to_numeric(df[cc], errors='coerce')*0.999,
         'Volume': pd.to_numeric(df[vc], errors='coerce') if vc else 0.0,
     }).dropna(subset=['Data','Zamkniecie']).sort_values('Data').set_index('Data')
-
     if timeframe.upper().startswith("H"):
         out = out.resample('H').agg({'Zamkniecie':'last','Najwyzszy':'max','Najnizszy':'min','Volume':'sum'}).dropna(subset=['Zamkniecie'])
     else:
         out = out.resample('D').agg({'Zamkniecie':'last','Najwyzszy':'max','Najnizszy':'min','Volume':'sum'}).dropna(subset=['Zamkniecie'])
-
     out['ret'] = out['Zamkniecie'].pct_change()
     out['EMA15']  = out['Zamkniecie'].ewm(span=15,  adjust=False).mean()
     out['EMA40']  = out['Zamkniecie'].ewm(span=40,  adjust=False).mean()
@@ -141,7 +139,6 @@ def ema_core_signals_regime(df_bt: pd.DataFrame, regime_params: dict|None=None, 
         rp = regime_params.get(reg.iloc[i], regime_params["side_midvol"])
         buy_base  = (ema15.iloc[i] > ema40.iloc[i]) and (price > float(ema100.iloc[i]))
         sell_base = (ema15.iloc[i] < ema40.iloc[i]) or  (price < float(ema100.iloc[i]))
-
         v_ok_buy  = _volume_gate(float(volz.iloc[i]) if not pd.isna(volz.iloc[i]) else None,
                                  float(obv_s.iloc[i]) if not pd.isna(obv_s.iloc[i]) else None, rp.get("vol_conf","off"))
         v_ok_sell = _volume_gate(float(volz.iloc[i]) if not pd.isna(volz.iloc[i]) else None,
@@ -149,7 +146,6 @@ def ema_core_signals_regime(df_bt: pd.DataFrame, regime_params: dict|None=None, 
         if sentiment_gate:
             if sent.iloc[i] >= 0.6: v_ok_sell = False
             if sent.iloc[i] <= 0.4: v_ok_buy = False
-
         if not position:
             if buy_base and (rsi14.iloc[i] > rp["rsi_buy_floor"]) and v_ok_buy:
                 position=True; entry_i=i; entry_p=price
